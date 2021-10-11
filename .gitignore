@@ -1,0 +1,4 @@
+# 排除.idea
+.idea
+# 排除日志
+blog_service/storage/logs/*
