@@ -38,7 +38,7 @@ func (a Article) List(c *gin.Context) {
 	svc := service.New(c.Request.Context())
 	pager := app.Pager{Page: app.GetPage(c), PageSize: app.GetPageSize(c)}
 	totalRows, err := svc.CountArticle(&service.CountArticleRequest{Title: param.Title,
-		Content: param.Content, Desc: param.Desc, CoverImageUrl: param.CoverImageUrl, State: param.State})
+		Content: param.Content, Desc: param.Desc, State: param.State})
 	if err != nil {
 		global.Logger.Errorf("svc.CountArticle err: %v", err)
 		response.ToErrorResponse(errcode.ErrorCountArticleFail)

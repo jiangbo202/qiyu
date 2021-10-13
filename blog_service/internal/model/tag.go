@@ -31,7 +31,7 @@ type TagSwagger struct {
 func (t Tag) Count(db *gorm.DB) (int, error) {
 	var count int
 	if t.Name != "" {
-		db = db.Where("name = ?", t.Name)
+		db = db.Where("name like ?", "%"+t.Name+"%")
 	}
 	db = db.Where("state = ?", t.State)
 	if err := db.Model(&t).Where("is_del = ?", 0).Count(&count).Error; err != nil {
@@ -40,19 +40,6 @@ func (t Tag) Count(db *gorm.DB) (int, error) {
 
 	return count, nil
 }
-
-//	user := &v1.User{}
-//	err := u.db.Where("name = ?", username).First(&user).Error
-//	if err != nil {
-//		if errors.Is(err, gorm.ErrRecordNotFound) {
-//			return nil, errors.WithCode(code.ErrUserNotFound, err.Error())
-//		}
-//
-//		return nil, errors.WithCode(code.ErrDatabase, err.Error())
-//	}
-//
-//	return user, nil
-
 
 func (t Tag) Retrieve(db *gorm.DB) (*Tag, error) {
 	tag := &Tag{}
@@ -67,7 +54,7 @@ func (t Tag) List(db *gorm.DB, pageOffset, pageSize int) ([]*Tag, error) {
 		db = db.Offset(pageOffset).Limit(pageSize)
 	}
 	if t.Name != "" {
-		db = db.Where("name=?", t.Name)
+		db = db.Where("name like ?", "%"+t.Name+"%")
 	}
 	db = db.Where("state=?", t.State)
 	if err = db.Where("is_del=?", 0).Find(&tags).Error; err != nil {

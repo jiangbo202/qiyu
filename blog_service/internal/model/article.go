@@ -12,11 +12,13 @@ import "github.com/jinzhu/gorm"
 
 type Article struct {
 	*Model
-	Title         string `json:"title"`
-	Desc          string `json:"desc"`
-	Content       string `json:"content"`
-	CoverImageUrl string `json:"cover_image_url"`
-	State         uint8  `json:"state"`
+	Title         string   `json:"title"`
+	Desc          string   `json:"desc"`
+	Content       string   `json:"content"`
+	State         uint8    `json:"state"`
+	CategoryId    uint32   `json:"category_id"`
+	Category      Category `json:"category" gorm:"foreignkey:CategoryId"` // 关联外键
+	Tag           []Tag    `json:"tag" gorm:"many2many:blog_article_tag"`      // 多对多
 }
 
 func (a Article) TableName() string {
@@ -40,7 +42,7 @@ func (a Article) Count(db *gorm.DB) (int, error) {
 func (a Article) List(db *gorm.DB, offset int, size int) ([]*Article, error) {
 	var articles []*Article
 	var err error
-	if offset >0 && size >0 {
+	if offset > 0 && size > 0 {
 		db = db.Offset(offset).Limit(size)
 	}
 	if a.Title != "" {
@@ -48,7 +50,7 @@ func (a Article) List(db *gorm.DB, offset int, size int) ([]*Article, error) {
 	}
 	// 其他字段...
 	db = db.Where("state=?", a.State)
-	if err = db.Find(&articles).Error; err !=nil{
+	if err = db.Find(&articles).Error; err != nil {
 		return nil, err
 	}
 	return articles, nil
@@ -57,4 +59,3 @@ func (a Article) List(db *gorm.DB, offset int, size int) ([]*Article, error) {
 func (a Article) Create(db *gorm.DB) error {
 	return db.Create(&a).Error
 }
-

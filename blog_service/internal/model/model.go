@@ -18,13 +18,13 @@ import (
 )
 
 type Model struct {
-	ID         uint32 `gorm:"primary_key" json:"id"`
-	CreatedBy  string `json:"created_by"`
-	ModifiedBy string `json:"modified_by"`
-	CreatedOn  uint32 `json:"created_on"`
-	ModifiedOn uint32 `json:"modified_on"`
-	DeletedOn  uint32 `json:"deleted_on"`
-	IsDel      uint8  `json:"is_del"`
+	ID         uint32    `gorm:"primary_key" json:"id"`
+	CreatedBy  string    `json:"created_by"`
+	ModifiedBy string    `json:"modified_by"`
+	CreatedAt  time.Time `json:"created_at"`
+	ModifiedAt time.Time `json:"modified_at"`
+	DeletedAt  time.Time `json:"deleted_at" gorm:"default:null"`
+	IsDel      uint8     `json:"is_del"`
 }
 
 func NewDBEngine(databaseSetting *pkg.DatabaseSettingS) (*gorm.DB, error) {
@@ -54,14 +54,14 @@ func NewDBEngine(databaseSetting *pkg.DatabaseSettingS) (*gorm.DB, error) {
 
 func updateTimeStampForCreateCallback(scope *gorm.Scope) {
 	if !scope.HasError() {
-		nowTime := time.Now().Unix()
-		if createTimeField, ok := scope.FieldByName("CreatedOn"); ok {
+		nowTime := time.Now()
+		if createTimeField, ok := scope.FieldByName("CreatedAt"); ok {
 			if createTimeField.IsBlank {
 				_ = createTimeField.Set(nowTime)
 			}
 		}
 
-		if modifyTimeField, ok := scope.FieldByName("ModifiedOn"); ok {
+		if modifyTimeField, ok := scope.FieldByName("ModifiedAt"); ok {
 			if modifyTimeField.IsBlank {
 				_ = modifyTimeField.Set(nowTime)
 			}
@@ -70,7 +70,7 @@ func updateTimeStampForCreateCallback(scope *gorm.Scope) {
 }
 func updateTimeStampForUpdateCallback(scope *gorm.Scope) {
 	if _, ok := scope.Get("gorm:update_column"); !ok {
-		_ = scope.SetColumn("ModifiedOn", time.Now().Unix())
+		_ = scope.SetColumn("ModifiedAt", time.Now())
 	}
 }
 func deleteCallback(scope *gorm.Scope) {
@@ -80,10 +80,10 @@ func deleteCallback(scope *gorm.Scope) {
 			extraOption = fmt.Sprint(str)
 		}
 
-		deletedOnField, hasDeletedOnField := scope.FieldByName("DeletedOn")
+		deletedOnField, hasDeletedOnField := scope.FieldByName("DeletedAt")
 		isDelField, hasIsDelField := scope.FieldByName("IsDel")
 		if !scope.Search.Unscoped && hasDeletedOnField && hasIsDelField {
-			now := time.Now().Unix()
+			now := time.Now()
 			scope.Raw(fmt.Sprintf(
 				"UPDATE %v SET %v=%v,%v=%v%v%v",
 				scope.QuotedTableName(),

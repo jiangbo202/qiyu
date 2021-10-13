@@ -38,17 +38,22 @@ func init() {
 	}
 }
 
-
 // @title 博客系统
 // @version 1.0
 // @description Go 语言编程之旅：一起用 Go 做项目
 // @termsOfService https://github.com/go-programming-tour-book
 func main() {
 
+	models := []interface{}{&model.Article{}, &model.Tag{}, &model.Category{}, &model.Auth{}}
+	err := global.DBEngine.AutoMigrate(models...).Error
+	if err != nil {
+		panic("db迁移失败")
+	}
+
 	gin.SetMode(global.ServerSetting.RunMode)
 	router := routers.NewRouter()
 	s := &http.Server{
-		Addr:           ":"+global.ServerSetting.HttpPort,
+		Addr:           ":" + global.ServerSetting.HttpPort,
 		Handler:        router,
 		ReadTimeout:    global.ServerSetting.ReadTimeOut,
 		WriteTimeout:   global.ServerSetting.WriteTimeOut,
@@ -98,7 +103,7 @@ func setupDBEngine() error {
 
 func setupLogger() error {
 	global.Logger = logger.NewLogger(&lumberjack.Logger{
-		Filename: global.AppSetting.LogSavePath + "/" + global.AppSetting.LogFileName + global.AppSetting.LogFileExt,
+		Filename:  global.AppSetting.LogSavePath + "/" + global.AppSetting.LogFileName + global.AppSetting.LogFileExt,
 		MaxSize:   600,
 		MaxAge:    10,
 		LocalTime: true,

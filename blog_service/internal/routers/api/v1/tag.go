@@ -9,21 +9,36 @@
 package v1
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/cast"
 	"jiangbo.com/blog_service/global"
 	"jiangbo.com/blog_service/internal/service"
 	"jiangbo.com/blog_service/pkg/app"
 	"jiangbo.com/blog_service/pkg/convert"
 	"jiangbo.com/blog_service/pkg/errcode"
+	"jiangbo.com/blog_service/pkg/time_parse"
 )
 
-type Tag struct {}
+type Tag struct{}
 
 func NewTag() Tag {
 	return Tag{}
 }
 
-func (t Tag) Get(c *gin.Context)  {
+type TagRes struct {
+	Id         int    `json:"id"`
+	Name       string `json:"name"`
+	State      uint8  `json:"state"`
+	CreatedBy  string `json:"created_by"`
+	ModifiedBy string `json:"modified_by"`
+	CreatedAt  string `json:"created_at"`
+	ModifiedAt string `json:"modified_at"`
+	DeletedAt  string `json:"deleted_at"`
+	IsDel      uint8  `json:"is_del"`
+}
+
+func (t Tag) Get(c *gin.Context) {
 	param := service.RetrieveTagRequest{ID: convert.StrTo(c.Param("id")).MustUInt32()}
 	response := app.NewResponse(c)
 	valid, errs := app.BindAndValid(c, &param)
@@ -40,7 +55,18 @@ func (t Tag) Get(c *gin.Context)  {
 		response.ToErrorResponse(errcode.ErrorRetrieveTagFail)
 		return
 	}
-	response.ToResponse(tag)
+	tagRes := TagRes{
+		Id: cast.ToInt(tag.ID),
+		Name: tag.Name,
+		State: tag.State,
+		CreatedBy: tag.CreatedBy,
+		ModifiedBy: tag.ModifiedBy,
+		CreatedAt: time_parse.TimeCSTLayoutString(tag.CreatedAt),
+		ModifiedAt: time_parse.TimeCSTLayoutString(tag.ModifiedAt),
+		DeletedAt: time_parse.TimeCSTLayoutString(tag.DeletedAt),
+		IsDel: tag.IsDel,
+	}
+	response.ToResponse(tagRes)
 	return
 }
 
@@ -54,7 +80,7 @@ func (t Tag) Get(c *gin.Context)  {
 // @Failure 400 {object} errcode.Error "请求错误"
 // @Failure 500 {object} errcode.Error "内部错误"
 // @Router /api/v1/tags [get]
-func (t Tag) List(c *gin.Context)  {
+func (t Tag) List(c *gin.Context) {
 	param := service.TagListRequest{}
 	response := app.NewResponse(c)
 	valid, errs := app.BindAndValid(c, &param)
@@ -80,7 +106,24 @@ func (t Tag) List(c *gin.Context)  {
 		return
 	}
 
-	response.ToResponseList(tags, totalRows)
+	tagList := make([]TagRes, len(tags))
+	for k, v := range tags {
+		fmt.Println(v.DeletedAt)
+		_tag := TagRes{
+			Id: cast.ToInt(v.ID),
+			Name: v.Name,
+			State: v.State,
+			CreatedBy: v.CreatedBy,
+			ModifiedBy: v.ModifiedBy,
+			CreatedAt: time_parse.TimeCSTLayoutString(v.CreatedAt),
+			ModifiedAt: time_parse.TimeCSTLayoutString(v.ModifiedAt),
+			DeletedAt: time_parse.TimeCSTLayoutString(v.DeletedAt),
+			IsDel: v.IsDel,
+		}
+		tagList[k] = _tag
+	}
+
+	response.ToResponseList(tagList, totalRows)
 	return
 }
 
@@ -93,7 +136,7 @@ func (t Tag) List(c *gin.Context)  {
 // @Failure 400 {object} errcode.Error "请求错误"
 // @Failure 500 {object} errcode.Error "内部错误"
 // @Router /api/v1/tags [post]
-func (t Tag) Create(c *gin.Context)  {
+func (t Tag) Create(c *gin.Context) {
 	param := service.CreateTagRequest{}
 	response := app.NewResponse(c)
 	valid, errs := app.BindAndValid(c, &param)
@@ -125,7 +168,7 @@ func (t Tag) Create(c *gin.Context)  {
 // @Failure 400 {object} errcode.Error "请求错误"
 // @Failure 500 {object} errcode.Error "内部错误"
 // @Router /api/v1/tags/{id} [put]
-func (t Tag) Update(c *gin.Context)  {
+func (t Tag) Update(c *gin.Context) {
 	param := service.UpdateTagRequest{ID: convert.StrTo(c.Param("id")).MustUInt32()}
 	response := app.NewResponse(c)
 	valid, errs := app.BindAndValid(c, &param)
@@ -154,7 +197,7 @@ func (t Tag) Update(c *gin.Context)  {
 // @Failure 400 {object} errcode.Error "请求错误"
 // @Failure 500 {object} errcode.Error "内部错误"
 // @Router /api/v1/tags/{id} [delete]
-func (t Tag) Delete(c *gin.Context)  {
+func (t Tag) Delete(c *gin.Context) {
 	param := service.DeleteTagRequest{ID: convert.StrTo(c.Param("id")).MustUInt32()}
 	response := app.NewResponse(c)
 	valid, errs := app.BindAndValid(c, &param)
