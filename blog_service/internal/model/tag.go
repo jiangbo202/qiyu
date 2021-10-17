@@ -15,8 +15,9 @@ import (
 
 type Tag struct {
 	*Model
-	Name  string `json:"name"`
-	State uint8  `json:"state"`
+	Name     string    `json:"name"`
+	State    uint8     `json:"state"`
+	//Articles []Article `json:"articles" gorm:"many2many:blog_article_tag"` // 多对多
 }
 
 func (t Tag) TableName() string {

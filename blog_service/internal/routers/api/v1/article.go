@@ -13,6 +13,7 @@ import (
 	"jiangbo.com/blog_service/global"
 	"jiangbo.com/blog_service/internal/service"
 	"jiangbo.com/blog_service/pkg/app"
+	"jiangbo.com/blog_service/pkg/convert"
 	"jiangbo.com/blog_service/pkg/errcode"
 )
 
@@ -73,7 +74,27 @@ func (a Article) Create(c *gin.Context) {
 	return
 }
 
-func (a Article) Update(c *gin.Context) {}
+func (a Article) Update(c *gin.Context) {
+	param := service.UpdateArticleRequest{ID: convert.StrTo(c.Param("id")).MustUInt32()}
+	response := app.NewResponse(c)
+	valid, errs := app.BindAndValid(c, &param)
+	if !valid {
+		global.Logger.Errorf("app.BindAndValid errs: %v", errs)
+		response.ToErrorResponse(errcode.InvalidParams.WithDetails(errs.Errors()...))
+		return
+	}
+
+	svc := service.New(c.Request.Context())
+	err := svc.UpdateArticle(&param)
+	if err != nil {
+		global.Logger.Errorf("svc.UpdateArticle err: %v", err)
+		response.ToErrorResponse(errcode.ErrorUpdateTagFail)
+		return
+	}
+
+	response.ToResponse(gin.H{})
+	return
+}
 
 func (a Article) Delete(c *gin.Context) {}
 

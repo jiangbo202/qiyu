@@ -47,6 +47,7 @@ func NewRouter() *gin.Engine {
 
 	tag := v1.NewTag()
 	article := v1.NewArticle()
+	category := v1.NewCategory()
 
 	upload := api.NewUpload()
 	r.POST("/upload/file", upload.UploadFile)
@@ -70,6 +71,13 @@ func NewRouter() *gin.Engine {
 		apiv1.PATCH("/articles/:id", article.Update)
 		apiv1.GET("/articles", article.List)
 		apiv1.GET("/articles/:id", article.Get)
+
+		apiv1.POST("/category", category.Create)
+		apiv1.DELETE("/category/:id", category.Delete)
+		apiv1.PUT("/category/:id", category.Update)
+		apiv1.PATCH("/category/:id", category.Update)
+		apiv1.GET("/category", category.List)
+		apiv1.GET("/category/:id", category.Get)
 	}
 	return r
 }

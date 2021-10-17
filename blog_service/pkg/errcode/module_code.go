@@ -20,4 +20,12 @@ var (
 	ErrorGetArticleListFail = NewError(20010011, "获取文章列表失败")
 	ErrorCreateArticleFail  = NewError(20010012, "创建文章失败")
 	ErrorCountArticleFail   = NewError(20010015, "统计文章失败")
+
+	ErrorGetCategoryListFail  = NewError(20010021, "获取类别列表失败")
+	ErrorRetrieveCategoryFail = NewError(20010022, "获取类别失败")
+	ErrorCreateCategoryFail   = NewError(20010023, "创建类别失败")
+	ErrorUpdateCategoryFail   = NewError(20010024, "更新类别失败")
+	ErrorDeleteCategoryFail   = NewError(20010025, "删除类别失败")
+	ErrorCountCategoryFail    = NewError(20010026, "统计类别失败")
+
 )

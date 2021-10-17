@@ -23,7 +23,7 @@ type Model struct {
 	ModifiedBy string    `json:"modified_by"`
 	CreatedAt  time.Time `json:"created_at"`
 	ModifiedAt time.Time `json:"modified_at"`
-	DeletedAt  time.Time `json:"deleted_at" gorm:"default:null"`
+	DeletedAt  *time.Time `json:"deleted_at" gorm:"default:null"`
 	IsDel      uint8     `json:"is_del"`
 }
 
