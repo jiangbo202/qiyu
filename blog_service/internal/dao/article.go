@@ -26,10 +26,7 @@ func (d *Dao) GetArticleList(title string, desc string, content string, state ui
 
 func (d *Dao) CreateArticle(title string, desc string, content string, state uint8, by string, category_id int, tags []int) error {
 	var ts []model.Tag
-	for _, v := range tags {
-		tmp, _ := d.RetrieveTag(uint32(v))
-		ts = append(ts, *tmp)
-	}
+
 	article := model.Article{
 		Title:      title,
 		Desc:       desc,
@@ -37,9 +34,19 @@ func (d *Dao) CreateArticle(title string, desc string, content string, state uin
 		State:      state,
 		Model:      &model.Model{CreatedBy: by},
 		CategoryId: uint32(category_id),
-		Tag:        ts,
 	}
-	return article.Create(d.engine)
+
+	if err := article.Create(d.engine); err != nil {
+		return err
+	}
+
+	for _, v := range tags {
+		tmp, _ := d.RetrieveTag(uint32(v))
+		ts = append(ts, *tmp)
+	}
+
+	d.engine.Model(&article).Association("Tag").Append(ts)
+	return nil
 }
 
 func (d *Dao) UpdateArticle(id uint32, name string, state uint8, modifiedBy string, content string,
@@ -48,27 +55,30 @@ func (d *Dao) UpdateArticle(id uint32, name string, state uint8, modifiedBy stri
 		Model: &model.Model{ID: id},
 	}
 
-	var ts []model.Tag
-	for _, v := range tags {
-		tmp, _ := d.RetrieveTag(uint32(v))
-		ts = append(ts, *tmp)
-	}
-
 	values := map[string]interface{}{
 		"state":       state,
 		"modified_by": modifiedBy,
 		"content":     content,
 		"desc":        desc,
 		"category_id": category_id,
-		"tags":        ts,
 	}
-	if name != "" {
-		values["name"] = name
+
+	if err := article.Update(d.engine, values); err != nil {
+		return err
 	}
-	return article.Update(d.engine, values)
+
+	var ts []model.Tag
+	for _, v := range tags {
+		tmp, _ := d.RetrieveTag(uint32(v))
+		ts = append(ts, *tmp)
+	}
+
+	d.engine.Model(&article).Association("Tag").Replace(ts)
+
+	return nil
 }
 
 func (d *Dao) DeleteArticle(id uint32) error {
-	tag := model.Tag{Model: &model.Model{ID: id}}
-	return tag.Delete(d.engine)
+	article := model.Article{Model: &model.Model{ID: id}}
+	return article.Delete(d.engine)
 }

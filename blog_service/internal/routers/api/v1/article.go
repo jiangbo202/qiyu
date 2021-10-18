@@ -96,16 +96,22 @@ func (a Article) Update(c *gin.Context) {
 	return
 }
 
-func (a Article) Delete(c *gin.Context) {}
+func (a Article) Delete(c *gin.Context) {
+	param := service.DeleteArticleRequest{ID: convert.StrTo(c.Param("id")).MustUInt32()}
+	response := app.NewResponse(c)
+	valid, errs := app.BindAndValid(c, &param)
+	if !valid {
+		global.Logger.Errorf("app.BindAndValid errs: %v", errs)
+		response.ToErrorResponse(errcode.InvalidParams.WithDetails(errs.Errors()...))
+		return
+	}
 
-//
-//	svc := service.New(c.Request.Context())
-//	err := svc.CreateTag(&param)
-//	if err != nil {
-//		global.Logger.Errorf("svc.CreateTag err: %v", err)
-//		response.ToErrorResponse(errcode.ErrorCreateTagFail)
-//		return
-//	}
-//
-//	response.ToResponse(gin.H{})
-//	return
+	svc := service.New(c.Request.Context())
+	err := svc.DeleteArticle(&param)
+	if err != nil {
+		global.Logger.Errorf("svc.DeleteArticle err: %v", err)
+		response.ToErrorResponse(errcode.ErrorDeleteArticleFail)
+		return
+	}
+	response.ToResponse(gin.H{})
+}

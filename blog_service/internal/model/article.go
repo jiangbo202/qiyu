@@ -9,7 +9,6 @@
 package model
 
 import (
-	"fmt"
 	"github.com/jinzhu/gorm"
 )
 
@@ -53,11 +52,9 @@ func (a Article) List(db *gorm.DB, offset int, size int) ([]*Article, error) {
 	}
 	// 其他字段...
 	//db = db.Where("state=?", a.State)
-	fmt.Println(a)
 	if err = db.Preload("Category").Preload("Tag").Find(&articles).Error; err != nil {
 		return nil, err
 	}
-	fmt.Println(articles)
 	return articles, nil
 }
 
@@ -71,4 +68,8 @@ func (a Article) Update(db *gorm.DB, values interface{}) error {
 		return err
 	}
 	return nil
+}
+
+func (a Article) Delete(db *gorm.DB) error {
+	return db.Where("id=? and is_del=?", a.ID, 0).Delete(&a).Error
 }

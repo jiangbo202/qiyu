@@ -20,7 +20,7 @@
     - [ ] 左联右联，条件放在别的表上
 - [ ] 多环境切换
 - [ ] 异步机制 与消息队列
-- [ ] 定时周期任务
+- [ ] 定时周期任务 gocron
     这俩可以参考 crawlab
 - [ ] 权限rbac
 - [ ] 缓存机制
@@ -29,7 +29,10 @@
 
 写到表里的字段 为可读
 
-急需解决的问题：
-1. 为啥创建关联的时候，会把标签表内容更新一下？ update_time会更新时间
-   但是感觉这个操作没必要啊。是否可以取消掉？   这个得摸清楚。
+
+1. 如何创建多对多的关系？
+   1. 先create当前
+   2. 当前.Association("外键").append([]Tag)
+   > d.engine.Model(&article).Association("Tag").Append(ts)
 2. 修改的时候传入的是map那怎么改关联？
+   > d.engine.Model(&article).Association("Tag").Replace(ts)
